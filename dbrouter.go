@@ -37,7 +37,7 @@ type dbInsCfg struct {
 }
 
 
-type Config struct {
+type routeConfig struct {
 	Cluster map[string][]*dbLookupCfg `json:"cluster"`
 	Instances map[string] *dbInsCfg  `json:"instances"`
 }
@@ -52,7 +52,15 @@ func (m *Router) String() string {
 }
 
 
-func NewRouter(cfg *Config) (*Router, error) {
+func NewRouter(jscfg []byte) (*Router, error) {
+	var cfg routeConfig
+	err := json.Unmarshal(jscfg, &cfg)
+	if err != nil {
+		return nil, fmt.Errorf("dbrouter config unmarshal:%s", err)
+	}
+
+
+
 	r := &Router {
 		dbCls: &dbCluster {
 			clusters: make(map[string]*clsEntry),

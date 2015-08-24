@@ -10,7 +10,6 @@ import (
 	"log"
 	"fmt"
 	"time"
-	"encoding/json"
 	"io/ioutil"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -36,18 +35,7 @@ func newrouter(t *testing.T) {
 		return
 	}
 
-
-	var cfg Config
-
-    err = json.Unmarshal(data, &cfg)
-	if err != nil {
-		t.Errorf("config decode error:%s", err)
-		return
-	}
-
-	log.Println(cfg)
-
-	r, err := NewRouter(&cfg)
+	r, err := NewRouter(data)
 	if err != nil {
 		t.Errorf("config router error:%s", err)
 		return
