@@ -113,7 +113,17 @@ func newrouter(t *testing.T) {
 	}
 
 
-	for i := 0; i < 11; i++ {
+	for i := 0; i < 12; i++ {
+
+		err = r.MongoExecEventual("ACCOUNT", fmt.Sprintf("fuck%d", i), qf1)
+		if err != nil {
+			t.Errorf("do error:%s", err)
+		}
+
+	}
+
+
+	for i := 100; i < 110; i++ {
 
 		err = r.MongoExecEventual("ACCOUNT", fmt.Sprintf("fuck%d", i), qf1)
 		if err != nil {

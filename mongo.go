@@ -138,6 +138,11 @@ const (
 
 func dialConsistency(info *mgo.DialInfo, consistency mode) (session *mgo.Session, err error) {
 
+	// http://godoc.org/gopkg.in/mgo.v2#Dial
+	// This method is generally called just once for a given cluster.
+	// Further sessions to the same cluster are then established using the New or Copy methods on the obtained session.
+	// This will make them share the underlying cluster, and manage the pool of connections appropriately.
+	// Once the session is not useful anymore, Close must be called to release the resources appropriately.
 	session, err = mgo.DialWithInfo(info)
 	if err != nil {
 		return

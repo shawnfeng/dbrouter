@@ -35,21 +35,37 @@ func check_ins(t *testing.T, dbs *dbCluster, cluster, table, ins_res string) {
 func clustertest(t *testing.T) {
 
 	dbs := &dbCluster {
-		clusters: make(map[string][]*dbExpress),
+		clusters: make(map[string]*clsEntry),
 	}
 
 	cluster := "account"
 
-	err := dbs.addInstance(cluster, "user", "user[0-5]")
+	err := dbs.addInstance(cluster, &dbLookupCfg{"user", "regex", "user[0-5]"})
 	if err != nil {
 		t.Errorf("err add:%s", err)
 	}
 
-	err = dbs.addInstance(cluster, "auth", "auth[0-9]+")
+	err = dbs.addInstance(cluster, &dbLookupCfg{"auth", "regex", "auth[0-9]+"})
 	if err != nil {
 		t.Errorf("err add:%s", err)
 	}
 
+
+	err = dbs.addInstance(cluster, &dbLookupCfg{"aaafull", "full", "aaa"})
+	if err != nil {
+		t.Errorf("err add:%s", err)
+	}
+
+
+
+	err = dbs.addInstance(cluster, &dbLookupCfg{"aaareg", "regex", "aaa[0-9]*"})
+	if err != nil {
+		t.Errorf("err add:%s", err)
+	}
+
+
+
+	check_ins(t, dbs, cluster, "auser0", "")
 
 	check_ins(t, dbs, cluster, "user0", "user")
 	check_ins(t, dbs, cluster, "user1", "user")
@@ -63,5 +79,9 @@ func clustertest(t *testing.T) {
 	check_ins(t, dbs, cluster, "auth1", "auth")
 	check_ins(t, dbs, cluster, "auth99", "auth")
 	check_ins(t, dbs, cluster, "auth01", "auth")
+
+
+	check_ins(t, dbs, cluster, "aaa", "aaafull")
+	check_ins(t, dbs, cluster, "aaa0", "aaareg")
 
 }

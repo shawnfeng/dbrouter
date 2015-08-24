@@ -16,19 +16,30 @@ const (
 	DB_TYPE_MYSQL = "mysql"
 )
 
+type dbLookupCfg struct {
+	Instance string  `json:"instance"`
+	// match type: full or regex
+	Match string     `json:"match"`
+	Express string   `json:"express"`
+
+}
+
+func (m *dbLookupCfg) String() string {
+	return fmt.Sprintf("ins:%s exp:%s match:%s", m.Instance, m.Express, m.Match)
+}
+
+
+type dbInsCfg struct {
+	Dbtype string             `json:"dbtype"`
+	Dbname string             `json:"dbname"`
+	//Dbcfg map[string]interface{}   `json:"dbcfg"`
+	Dbcfg json.RawMessage      `json:"dbcfg"`
+}
+
 
 type Config struct {
-	Cluster map[string][]struct {
-		Instance string  `json:"instance"`
-		Express string   `json:"express"`
-	} `json:"cluster"`
-
-	Instances map[string]struct {
-		Dbtype string             `json:"dbtype"`
-		Dbname string             `json:"dbname"`
-		//Dbcfg map[string]interface{}   `json:"dbcfg"`
-		Dbcfg json.RawMessage      `json:"dbcfg"`
-	} `json:"instances"`
+	Cluster map[string][]*dbLookupCfg `json:"cluster"`
+	Instances map[string] *dbInsCfg  `json:"instances"`
 }
 
 type Router struct {
@@ -44,7 +55,7 @@ func (m *Router) String() string {
 func NewRouter(cfg *Config) (*Router, error) {
 	r := &Router {
 		dbCls: &dbCluster {
-			clusters: make(map[string][]*dbExpress),
+			clusters: make(map[string]*clsEntry),
 		},
 
 		dbIns: &dbInstanceManager {
@@ -56,7 +67,9 @@ func NewRouter(cfg *Config) (*Router, error) {
 	cls := cfg.Cluster
 	for c, ins := range cls {
 		for _, v := range ins {
-			r.dbCls.addInstance(c, v.Instance, v.Express)
+			if err := r.dbCls.addInstance(c, v); err != nil {
+				return nil, fmt.Errorf("load instance lookup rule err:%s", err.Error())
+			}
 		}
 	}
 
@@ -69,7 +82,7 @@ func NewRouter(cfg *Config) (*Router, error) {
 		if tp == DB_TYPE_MONGO {
 			dbi, err := NewdbMongo(tp, dbname, cfg)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("init mongo config err:%s", err.Error())
 			}
 
 			r.dbIns.add(ins, dbi)
@@ -82,3 +95,8 @@ func NewRouter(cfg *Config) (*Router, error) {
 
 
 
+// 通过传入配置方式加载，配置的结构对外面隐藏
+// 无论是全匹配，还是正则匹配，被查找的表明必须全部被匹配命中才能生效
+// 全匹配优先进行
+// db cfg虽然是透传，但是也增加json检查??
+// 更细节的err输出,不要只单独返回err，还要返回时哪里的err

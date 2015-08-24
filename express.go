@@ -11,55 +11,84 @@ import (
 	"regexp"
 )
 
+type clsEntry struct {
+	// express to instances
+	full map[string]*dbExpress
+	regex map[string]*dbExpress
+}
 
 // 没有考虑同步问题
 // 目前只支持初始化一次加载完成
 // 构建完成后不能动态调整
 type dbCluster struct {
-	//clsMu sync.Mutex
-	clusters map[string][]*dbExpress
+	// cluster to express
+	clusters map[string]*clsEntry
+
+	// cache table to instance
+	// map[string]string
+	//locCache map[string]string
 }
 
 type dbExpress struct {
-	ins string
-	exp string
+	lookup *dbLookupCfg
 	reg *regexp.Regexp
 }
 
 func (m *dbExpress) String() string {
-	return fmt.Sprintf("express:%s ins:%s", m.exp, m.ins)
+	return fmt.Sprintf("look:%s reg:%s", m.lookup, m.reg)
 }
 
 
-func (m *dbCluster) addInstance(cluster, ins, expr string) error {
-	reg, err := regexp.Compile(expr)
-	if err != nil {
-		return err
-	}
-
-	//m.clsMu.Lock()
-	//defer m.clsMu.Unlock()
-
+func (m *dbCluster) addInstance(cluster string, lcfg *dbLookupCfg) error {
 	if _, ok := m.clusters[cluster]; !ok {
-		m.clusters[cluster] = make([]*dbExpress, 0)
+		m.clusters[cluster] = &clsEntry {
+			full: make(map[string]*dbExpress),
+			regex: make(map[string]*dbExpress),
+		}
 	}
 
-	m.clusters[cluster] = append(m.clusters[cluster], &dbExpress{ins, expr, reg})
+
+	match := lcfg.Match
+	if match == "full" {
+		m.clusters[cluster].full[lcfg.Express] = &dbExpress{lookup: lcfg}
+
+	} else if match == "regex" {
+		reg, err := regexp.CompilePOSIX(lcfg.Express)
+		if err != nil {
+			return err
+		}
+
+		m.clusters[cluster].regex[lcfg.Express] = &dbExpress{lookup: lcfg, reg: reg}
+
+	} else {
+		return fmt.Errorf("match type:%s not support", match)
+	}
 
 	return nil
 }
 
 func (m *dbCluster) getInstance(cluster string, table string) string {
-	//m.clsMu.Lock()
-	//defer m.clsMu.Unlock()
+	exp := m.clusters[cluster]
+	if exp == nil {
+		return ""
+	}
 
-	if v, ok := m.clusters[cluster]; ok {
-		for _, e := range v {
-			if e.reg.MatchString(table) {
-				return e.ins
-			}
+	// 先全匹配查找
+	en := exp.full[table]
+	if en != nil {
+		return en.lookup.Instance
+	}
+
+	// 正则
+	for _, e := range exp.regex {
+		// 必须全部匹配上
+		f := e.reg.FindString(table)
+		//fmt.Println("DDDDDD", f, table, e)
+		if table == f {
+			return e.lookup.Instance
 		}
 	}
 
 	return ""
+
 }
