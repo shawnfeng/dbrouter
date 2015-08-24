@@ -121,5 +121,11 @@ func newrouter(t *testing.T) {
 	}
 
 
+	err = r.MongoExecEventual("ACCOUNT", fmt.Sprintf("fuck%d", 10000), qf1)
+	if err != nil {
+		t.Errorf("do error:%s", err)
+	}
+
+
 }
 

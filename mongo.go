@@ -92,12 +92,12 @@ func NewdbMongo(dbtype, dbname string, cfg []byte) (*dbMongo, error) {
 
 	cfg_json, err := simplejson.NewJson(cfg)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("instance db:%s type:%s config:%s unmarshal err:%s", dbname, dbtype, cfg, err)
 	}
 
 	addrs, err := cfg_json.Get("addrs").StringArray()
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("instance db:%s type:%s config:% addrs err:%s", dbname, dbtype, cfg, err)
 	}
 
 	timeout := 60 * time.Second

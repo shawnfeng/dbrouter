@@ -50,9 +50,18 @@ func (m *dbCluster) addInstance(cluster string, lcfg *dbLookupCfg) error {
 
 	match := lcfg.Match
 	if match == "full" {
+		if m.clusters[cluster].full[lcfg.Express] != nil {
+			return fmt.Errorf("dup match full in cluster:%s express:%s", cluster, lcfg.Express)
+		}
+
 		m.clusters[cluster].full[lcfg.Express] = &dbExpress{lookup: lcfg}
 
 	} else if match == "regex" {
+		if m.clusters[cluster].regex[lcfg.Express] != nil {
+			return fmt.Errorf("dup match regex in cluster:%s express:%s", cluster, lcfg.Express)
+		}
+
+
 		reg, err := regexp.CompilePOSIX(lcfg.Express)
 		if err != nil {
 			return err

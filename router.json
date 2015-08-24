@@ -2,7 +2,8 @@
     "cluster": {
         "ACCOUNT": [
             {"instance": "account", "match": "regex", "express": "user[0-10]|member[0-9]+"},
-            {"instance": "account", "match": "regex", "express": "fuck[0-9]|fuck[0-9][0-9]|fuck[0-9][0-9]+"}
+            {"instance": "account", "match": "regex", "express": "fuck[0-9]|fuck[0-9][0-9]|fuck[0-9][0-9]+"},
+            {"instance": "account", "match": "full", "express": "fuck10000"}
         ],
         "UGC": [
             {"instance": "account", "match": "regex", "express": "lucky[0-9]+"},

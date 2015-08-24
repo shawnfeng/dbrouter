@@ -72,14 +72,6 @@ func NewRouter(jscfg []byte) (*Router, error) {
 		},
 	}
 
-	cls := cfg.Cluster
-	for c, ins := range cls {
-		for _, v := range ins {
-			if err := r.dbCls.addInstance(c, v); err != nil {
-				return nil, fmt.Errorf("load instance lookup rule err:%s", err.Error())
-			}
-		}
-	}
 
 	inss := cfg.Instances
 	for ins, db := range inss {
@@ -97,6 +89,21 @@ func NewRouter(jscfg []byte) (*Router, error) {
 		}
 
 	}
+
+
+	cls := cfg.Cluster
+	for c, ins := range cls {
+		for _, v := range ins {
+			if r.dbIns.get(v.Instance) == nil {
+				return nil, fmt.Errorf("in cluster:%s instance:%s not found", c, v.Instance)
+			}
+
+			if err := r.dbCls.addInstance(c, v); err != nil {
+				return nil, fmt.Errorf("load instance lookup rule err:%s", err.Error())
+			}
+		}
+	}
+
 
 	return r, nil
 }
