@@ -6,8 +6,8 @@
             {"instance": "account", "match": "full", "express": "fuck10000"}
         ],
         "UGC": [
-            {"instance": "account", "match": "regex", "express": "lucky[0-9]+"},
-            {"instance": "beauty", "match": "regex", "express": "girl[0-9]+"}
+            {"instance": "account", "match": "regex", "express": "lucky[0-9]+"}
+
         ]
     },
 

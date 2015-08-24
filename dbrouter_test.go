@@ -127,5 +127,10 @@ func newrouter(t *testing.T) {
 	}
 
 
+	log.Println("ROUTER INFO:", r.RouterInfo("ACCOUNT", "fuck10"))
+	log.Println("ROUTER INFO:", r.RouterInfo("ACCOUNT", "fuck10000"))
+	log.Println("ROUTER INFO:", r.RouterInfo("ACCOUNT", "fuck"))
+
+
 }
 

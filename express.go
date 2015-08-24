@@ -76,16 +76,18 @@ func (m *dbCluster) addInstance(cluster string, lcfg *dbLookupCfg) error {
 	return nil
 }
 
-func (m *dbCluster) getInstance(cluster string, table string) string {
+func (m *dbCluster) getLookup(cluster string, table string) *dbLookupCfg {
+
+
 	exp := m.clusters[cluster]
 	if exp == nil {
-		return ""
+		return nil
 	}
 
 	// 先全匹配查找
 	en := exp.full[table]
 	if en != nil {
-		return en.lookup.Instance
+		return en.lookup
 	}
 
 	// 正则
@@ -94,10 +96,18 @@ func (m *dbCluster) getInstance(cluster string, table string) string {
 		f := e.reg.FindString(table)
 		//fmt.Println("DDDDDD", f, table, e)
 		if table == f {
-			return e.lookup.Instance
+			return e.lookup
 		}
 	}
 
-	return ""
+	return nil
+}
+
+func (m *dbCluster) getInstance(cluster string, table string) string {
+	if lk := m.getLookup(cluster, table); lk != nil {
+		return lk.Instance
+	} else {
+		return ""
+	}
 
 }

@@ -51,6 +51,17 @@ func (m *Router) String() string {
 	return fmt.Sprintf("%s", m.dbCls.clusters)
 }
 
+func (m *Router) RouterInfo(cluster, table string) string {
+	if lk := m.dbCls.getLookup(cluster, table); lk != nil {
+		rt, _ := json.Marshal(lk)
+		return string(rt)
+
+	} else {
+		return ""
+	}
+}
+
+
 
 func NewRouter(jscfg []byte) (*Router, error) {
 	var cfg routeConfig
