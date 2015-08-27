@@ -22,7 +22,7 @@
         },
 
         "beauty": {
-            "dbtype": "mysql", "dbname":"women", "dbcfg": {"user":"hello", "passwd":"world", "addrs": ["w:127.0.0.1:323", "r:127.0.0.1:32334"]}
+            "dbtype": "mongo", "dbname":"women", "dbcfg": {"user":"hello", "passwd":"world", "addrs": ["w:127.0.0.1:323", "r:127.0.0.1:32334"]}
         }
     }
 }

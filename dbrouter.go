@@ -62,6 +62,35 @@ func (m *Router) RouterInfo(cluster, table string) string {
 }
 
 
+// 检查用户输入的合法性
+// 1. 只能是字母或者下划线
+// 2. 首字母不能为数字，或者下划线
+func checkVarname(varname string) error {
+	if len(varname) == 0 {
+		return fmt.Errorf("is empty")
+	}
+
+	f := varname[0]
+	if !((f>='a' && f<='z') || (f>='A' && f<='Z')) {
+		return fmt.Errorf("first char is not alpha")
+	}
+
+	for _, c := range varname {
+
+		if (c>='a' && c<='z') || (c>='A' && c<='Z') {
+			continue
+		} else if c>='0' && c<='9' {
+			continue
+		} else if c == '_' {
+			continue
+		} else {
+			return fmt.Errorf("is contain not [a-z] or [A-Z] or [0-9] or _")
+		}
+	}
+
+	return nil
+}
+
 
 func NewRouter(jscfg []byte) (*Router, error) {
 	var cfg routeConfig
@@ -86,20 +115,20 @@ func NewRouter(jscfg []byte) (*Router, error) {
 
 	inss := cfg.Instances
 	for ins, db := range inss {
-		if len(ins) == 0 {
-			return nil, fmt.Errorf("instances config find empty name")
+		if er := checkVarname(ins); er != nil {
+			return nil, fmt.Errorf("instances name config err:%s", er)
 		}
 
 		tp := db.Dbtype
 		dbname := db.Dbname
 		cfg := db.Dbcfg
 
-		if len(tp) == 0 {
-			return nil, fmt.Errorf("empty dbtype instance:%s", ins)
+		if er := checkVarname(tp); er != nil {
+			return nil, fmt.Errorf("dbtype instance:%s err:%s", ins, er)
 		}
 
-		if len(dbname) == 0 {
-			return nil, fmt.Errorf("empty dbname instance:%s", ins)
+		if er := checkVarname(dbname); er != nil {
+			return nil, fmt.Errorf("dbname instance:%s err:%s", ins, er)
 		}
 
 		if len(cfg) == 0 {
@@ -124,8 +153,8 @@ func NewRouter(jscfg []byte) (*Router, error) {
 
 	cls := cfg.Cluster
 	for c, ins := range cls {
-		if len(c) == 0 {
-			return nil, fmt.Errorf("cluster config find empty name")
+		if er := checkVarname(c); er != nil {
+			return nil, fmt.Errorf("cluster config name err:%s", er)
 		}
 
 
@@ -138,12 +167,13 @@ func NewRouter(jscfg []byte) (*Router, error) {
 				return nil, fmt.Errorf("empty express in cluster:%s instance:%s", c, v.Instance)
 			}
 
-			if len(v.Match) == 0 {
-				return nil, fmt.Errorf("empty match in cluster:%s instance:%s", c, v.Instance)
+
+			if er := checkVarname(v.Match); er != nil {
+				return nil, fmt.Errorf("match in cluster:%s instance:%s err:%s", c, v.Instance, er)
 			}
 
-			if len(v.Instance) == 0 {
-				return nil, fmt.Errorf("empty instance name in cluster:%s instance:%s", c, v.Instance)
+			if er := checkVarname(v.Instance); er != nil {
+				return nil, fmt.Errorf("instance name in cluster:%s instance:%s err:%s", c, v.Instance, er)
 			}
 
 

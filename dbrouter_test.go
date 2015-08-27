@@ -24,6 +24,63 @@ func TestRouter(t *testing.T) {
 
 	log.Println("test router")
 
+	err := checkVarname("abc")
+	fmt.Println("check name:", err)
+	if err != nil {
+		t.Errorf("check var name error")
+	}
+
+
+	err = checkVarname("abcABC__23")
+	fmt.Println("check name:", err)
+	if err != nil {
+		t.Errorf("check var name error")
+	}
+
+
+	err = checkVarname("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ__0123456789")
+	fmt.Println("check name:", err)
+	if err != nil {
+		t.Errorf("check var name error")
+	}
+
+
+
+	err = checkVarname("_abcdefg")
+	fmt.Println("check name:", err)
+	if err == nil {
+		t.Errorf("check var name error")
+	}
+
+
+	err = checkVarname("0abcdefg")
+	fmt.Println("check name:", err)
+	if err == nil {
+		t.Errorf("check var name error")
+	}
+
+
+	err = checkVarname("9abcdefg")
+	fmt.Println("check name:", err)
+	if err == nil {
+		t.Errorf("check var name error")
+	}
+
+
+	err = checkVarname("abcdefg*")
+	fmt.Println("check name:", err)
+	if err == nil {
+		t.Errorf("check var name error")
+	}
+
+
+	err = checkVarname("abcdefg[]")
+	fmt.Println("check name:", err)
+	if err == nil {
+		t.Errorf("check var name error")
+	}
+
+
 	newrouter(t)
 }
 
