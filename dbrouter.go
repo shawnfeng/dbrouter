@@ -57,7 +57,7 @@ func (m *Router) RouterInfo(cluster, table string) string {
 		return string(rt)
 
 	} else {
-		return ""
+		return "{}"
 	}
 }
 
@@ -86,9 +86,27 @@ func NewRouter(jscfg []byte) (*Router, error) {
 
 	inss := cfg.Instances
 	for ins, db := range inss {
+		if len(ins) == 0 {
+			return nil, fmt.Errorf("instances config find empty name")
+		}
+
 		tp := db.Dbtype
 		dbname := db.Dbname
 		cfg := db.Dbcfg
+
+		if len(tp) == 0 {
+			return nil, fmt.Errorf("empty dbtype instance:%s", ins)
+		}
+
+		if len(dbname) == 0 {
+			return nil, fmt.Errorf("empty dbname instance:%s", ins)
+		}
+
+		if len(cfg) == 0 {
+			return nil, fmt.Errorf("empty dbcfg instance:%s", ins)
+		}
+
+
 		// 工厂化构造，db类型领出来
 		if tp == DB_TYPE_MONGO {
 			dbi, err := NewdbMongo(tp, dbname, cfg)
@@ -97,6 +115,8 @@ func NewRouter(jscfg []byte) (*Router, error) {
 			}
 
 			r.dbIns.add(ins, dbi)
+		} else {
+			return nil, fmt.Errorf("db type not support:%s", tp)
 		}
 
 	}
@@ -104,7 +124,29 @@ func NewRouter(jscfg []byte) (*Router, error) {
 
 	cls := cfg.Cluster
 	for c, ins := range cls {
+		if len(c) == 0 {
+			return nil, fmt.Errorf("cluster config find empty name")
+		}
+
+
+		if len(ins) == 0 {
+			return nil, fmt.Errorf("empty instance in cluster:%s", c)
+		}
+
 		for _, v := range ins {
+			if len(v.Express) == 0 {
+				return nil, fmt.Errorf("empty express in cluster:%s instance:%s", c, v.Instance)
+			}
+
+			if len(v.Match) == 0 {
+				return nil, fmt.Errorf("empty match in cluster:%s instance:%s", c, v.Instance)
+			}
+
+			if len(v.Instance) == 0 {
+				return nil, fmt.Errorf("empty instance name in cluster:%s instance:%s", c, v.Instance)
+			}
+
+
 			if r.dbIns.get(v.Instance) == nil {
 				return nil, fmt.Errorf("in cluster:%s instance:%s not found", c, v.Instance)
 			}
