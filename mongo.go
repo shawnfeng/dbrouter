@@ -15,6 +15,10 @@ import (
 	//"gopkg.in/mgo.v2/bson"
 
 	"github.com/bitly/go-simplejson"
+
+	"github.com/shawnfeng/sutil/slog"
+	"github.com/shawnfeng/sutil/stime"
+
 )
 
 
@@ -230,21 +234,33 @@ func (m *dbMongo) getSession(consistency mode) (*mgo.Session, error) {
 
 
 func (m *Router) mongoExec(consistency mode, cluster, table string, query func (*mgo.Collection) error) error {
+	st := stime.NewTimeStat()
 
 	ins_name := m.dbCls.getInstance(cluster, table)
 	if ins_name == "" {
 		return fmt.Errorf("cluster instance not find: cluster:%s table:%s", cluster, table)
 	}
 
+	durInsn := st.Duration()
+	st.Reset()
+
 	ins := m.dbIns.get(ins_name)
 	if ins == nil {
 		return fmt.Errorf("db instance not find: cluster:%s table:%s", cluster, table)
 	}
 
+	durIns := st.Duration()
+	st.Reset()
+
+
 	db, ok := ins.(*dbMongo)
 	if !ok {
 		return fmt.Errorf("db instance type error: cluster:%s table:%s type:%s", cluster, table, ins.getType())
 	}
+
+	durInst := st.Duration()
+	st.Reset()
+
 	
 	sess, err := db.getSession(consistency)
 	if err != nil {
@@ -255,11 +271,20 @@ func (m *Router) mongoExec(consistency mode, cluster, table string, query func (
 		return fmt.Errorf("db instance session empty: cluster:%s table:%s type:%s", cluster, table, ins.getType())
 	}
 
-
+	durSess := st.Duration()
+	st.Reset()
 
 	sessionCopy := sess.Copy()
 	defer sessionCopy.Close()
 	c := sessionCopy.DB("").C(table)
+
+	durcopy := st.Duration()
+	st.Reset()
+
+	defer func() {
+		dur := st.Duration()
+		slog.Infof("[MONGO] const:%d cls:%s table:%s nmins:%d ins:%d rins:%d sess:%d copy:%d query:%d", consistency, cluster, table, durInsn, durIns, durInst, durSess, durcopy, dur)
+	}()
 
 	return query(c)
 }
