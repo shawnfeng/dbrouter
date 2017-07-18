@@ -7,6 +7,7 @@ package dbrouter
 
 import (
 	"fmt"
+	"github.com/shawnfeng/sutil/slog"
 	//"sync"
 	"encoding/json"
 )
@@ -93,6 +94,8 @@ func checkVarname(varname string) error {
 
 
 func NewRouter(jscfg []byte) (*Router, error) {
+	fun := "NewRouter -->"
+
 	var cfg routeConfig
 	err := json.Unmarshal(jscfg, &cfg)
 	if err != nil {
@@ -145,7 +148,8 @@ func NewRouter(jscfg []byte) (*Router, error) {
 
 			r.dbIns.add(ins, dbi)
 		} else {
-			return nil, fmt.Errorf("db type not support:%s", tp)
+			slog.Errorf("%s db type not support:%s", fun, tp)
+			//return nil, fmt.Errorf("db type not support:%s", tp)
 		}
 
 	}
@@ -178,7 +182,9 @@ func NewRouter(jscfg []byte) (*Router, error) {
 
 
 			if r.dbIns.get(v.Instance) == nil {
-				return nil, fmt.Errorf("in cluster:%s instance:%s not found", c, v.Instance)
+				slog.Errorf("%s in cluster:%s instance:%s not found", fun, c, v.Instance)
+				continue
+				//return nil, fmt.Errorf("in cluster:%s instance:%s not found", c, v.Instance)
 			}
 
 			if err := r.dbCls.addInstance(c, v); err != nil {
