@@ -2,14 +2,12 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-
 package dbrouter
-
 
 import (
 	"fmt"
-	"time"
 	"sync"
+	"time"
 	//"reflect"
 	"gopkg.in/mgo.v2"
 	//"gopkg.in/mgo.v2/bson"
@@ -18,79 +16,20 @@ import (
 
 	"github.com/shawnfeng/sutil/slog"
 	"github.com/shawnfeng/sutil/stime"
-
 )
 
-
 type dbMongo struct {
-	dbType string
-	dbName string
+	dbType   string
+	dbName   string
 	dialInfo *mgo.DialInfo
-	
 
-	sessMu sync.RWMutex
+	sessMu  sync.RWMutex
 	session [3]*mgo.Session
-
 }
 
 func (m *dbMongo) getType() string {
 	return m.dbType
 }
-
-/*
-func NewdbMongo(dbtype, dbname string, cfg map[string]interface{}) (*dbMongo, error) {
-
-	iaddrs, ok := cfg["addrs"]
-	if !ok {
-		return nil, fmt.Errorf("mongo addrs config not find")
-	}
-
-	iaddrs2, ok := iaddrs.([]interface{})
-	if !ok {
-		return nil, fmt.Errorf("mongo addrs config not array is:%s", reflect.TypeOf(iaddrs))
-	}
-
-	addrs := make([]string, 0)
-	for _, a := range iaddrs2 {
-		addr, ok := a.(string)
-		if !ok {
-			return nil, fmt.Errorf("mongo addr config not string is:%s", reflect.TypeOf(a))
-		} else {
-			addrs = append(addrs, addr)
-		}
-	}
-
-
-	timeout := 60 * time.Second
-
-	if itimeout, ok := cfg["timeout"]; ok {
-		t := reflect.ValueOf(itimeout).Int()
-		//if !ok {
-		//	return nil, fmt.Errorf("mongo timeout config not long is:%s", reflect.TypeOf(itimeout))
-		//}
-		timeout = time.Duration(t) * time.Millisecond
-	}
-
-
-
-	info := &mgo.DialInfo{
-		Addrs: addrs,
-		Timeout: timeout,
-		Database: dbname,
-		//Username: AuthUserName,
-		//Password: AuthPassword,
-	}
- 
-
-
-	return &dbMongo{
-		dbType: dbtype,
-		dbName: dbname,
-		dialInfo: info,
-	}, nil
-
-}
-*/
 
 func NewdbMongo(dbtype, dbname string, cfg []byte) (*dbMongo, error) {
 
@@ -109,28 +48,24 @@ func NewdbMongo(dbtype, dbname string, cfg []byte) (*dbMongo, error) {
 		timeout = time.Duration(t) * time.Millisecond
 	}
 
-
 	user, _ := cfg_json.Get("user").String()
 	passwd, _ := cfg_json.Get("passwd").String()
 
 	info := &mgo.DialInfo{
-		Addrs: addrs,
-		Timeout: timeout,
+		Addrs:    addrs,
+		Timeout:  timeout,
 		Database: dbname,
 		Username: user,
 		Password: passwd,
 	}
 
-
 	return &dbMongo{
-		dbType: dbtype,
-		dbName: dbname,
+		dbType:   dbtype,
+		dbName:   dbname,
 		dialInfo: info,
-
 	}, nil
 
 }
-
 
 type mode int
 
@@ -156,7 +91,6 @@ func dialConsistency(info *mgo.DialInfo, consistency mode) (session *mgo.Session
 	// 不设置这个在执行写入，表不存在时候会报 read tcp 127.0.0.1:27017: i/o timeout
 	session.SetSocketTimeout(1 * time.Minute)
 
-
 	switch consistency {
 	case eventual:
 		session.SetMode(mgo.Eventual, true)
@@ -168,7 +102,6 @@ func dialConsistency(info *mgo.DialInfo, consistency mode) (session *mgo.Session
 
 	return
 }
-
 
 func dialConsistencyWithUrl(url string, timeout time.Duration, consistency mode) (session *mgo.Session, err error) {
 
@@ -181,7 +114,6 @@ func dialConsistencyWithUrl(url string, timeout time.Duration, consistency mode)
 	// 不设置这个在执行写入，表不存在时候会报 read tcp 127.0.0.1:27017: i/o timeout
 	session.SetSocketTimeout(1 * time.Minute)
 
-
 	switch consistency {
 	case eventual:
 		session.SetMode(mgo.Eventual, true)
@@ -194,8 +126,6 @@ func dialConsistencyWithUrl(url string, timeout time.Duration, consistency mode)
 	return
 }
 
-
-
 func (m *dbMongo) checkGetSession(consistency mode) *mgo.Session {
 	m.sessMu.RLock()
 	defer m.sessMu.RUnlock()
@@ -203,7 +133,6 @@ func (m *dbMongo) checkGetSession(consistency mode) *mgo.Session {
 	return m.session[consistency]
 
 }
-
 
 func (m *dbMongo) initSession(consistency mode) (*mgo.Session, error) {
 	m.sessMu.Lock()
@@ -220,7 +149,7 @@ func (m *dbMongo) initSession(consistency mode) (*mgo.Session, error) {
 			m.session[consistency] = s
 			return m.session[consistency], nil
 		}
- 	}
+	}
 }
 
 func (m *dbMongo) getSession(consistency mode) (*mgo.Session, error) {
@@ -231,9 +160,7 @@ func (m *dbMongo) getSession(consistency mode) (*mgo.Session, error) {
 	}
 }
 
-
-
-func (m *Router) mongoExec(consistency mode, cluster, table string, query func (*mgo.Collection) error) error {
+func (m *Router) mongoExec(consistency mode, cluster, table string, query func(*mgo.Collection) error) error {
 	st := stime.NewTimeStat()
 
 	ins_name := m.dbCls.getInstance(cluster, table)
@@ -252,7 +179,6 @@ func (m *Router) mongoExec(consistency mode, cluster, table string, query func (
 	durIns := st.Duration()
 	st.Reset()
 
-
 	db, ok := ins.(*dbMongo)
 	if !ok {
 		return fmt.Errorf("db instance type error: cluster:%s table:%s type:%s", cluster, table, ins.getType())
@@ -261,7 +187,6 @@ func (m *Router) mongoExec(consistency mode, cluster, table string, query func (
 	durInst := st.Duration()
 	st.Reset()
 
-	
 	sess, err := db.getSession(consistency)
 	if err != nil {
 		return err
@@ -289,21 +214,14 @@ func (m *Router) mongoExec(consistency mode, cluster, table string, query func (
 	return query(c)
 }
 
-func (m *Router) MongoExecEventual(cluster, table string, query func (*mgo.Collection) error) error {
+func (m *Router) MongoExecEventual(cluster, table string, query func(*mgo.Collection) error) error {
 	return m.mongoExec(eventual, cluster, table, query)
 }
 
-func (m *Router) MongoExecMonotonic(cluster, table string, query func (*mgo.Collection) error) error {
+func (m *Router) MongoExecMonotonic(cluster, table string, query func(*mgo.Collection) error) error {
 	return m.mongoExec(monotonic, cluster, table, query)
 }
 
-func (m *Router) MongoExecStrong(cluster, table string, query func (*mgo.Collection) error) error {
+func (m *Router) MongoExecStrong(cluster, table string, query func(*mgo.Collection) error) error {
 	return m.mongoExec(strong, cluster, table, query)
 }
-
-
-
-
-
-
-
