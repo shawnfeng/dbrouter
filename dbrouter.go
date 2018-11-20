@@ -140,7 +140,7 @@ func NewRouter(jscfg []byte) (*Router, error) {
 		} else if tp == DB_TYPE_MYSQL || tp == DB_TYPE_POSTGRES {
 			dbi, err := NewdbSql(tp, dbname, cfg)
 			if err != nil {
-				return nil, fmt.Errorf("init %s config err:%s", tp, err.Error())
+				return nil, fmt.Errorf("init %s cfg:%s, config err:%s", tp, string(cfg), err.Error())
 			}
 
 			r.dbIns.add(ins, dbi)

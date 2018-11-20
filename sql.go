@@ -5,6 +5,7 @@
 package dbrouter
 
 import (
+	"database/sql"
 	"fmt"
 	"github.com/bitly/go-simplejson"
 	_ "github.com/go-sql-driver/mysql"
@@ -15,6 +16,52 @@ import (
 	"time"
 )
 
+type DB struct {
+	*sqlx.DB
+}
+
+func (db *DB) NamedExecWrapper(tables []interface{}, query string, arg interface{}) (sql.Result, error) {
+	query = fmt.Sprintf(query, tables...)
+	return db.DB.NamedExec(query, arg)
+}
+
+func (db *DB) NamedQueryWrapper(tables []interface{}, query string, arg interface{}) (*sqlx.Rows, error) {
+	query = fmt.Sprintf(query, tables...)
+	return db.DB.NamedQuery(query, arg)
+}
+
+func (db *DB) SelectWrapper(tables []interface{}, dest interface{}, query string, args ...interface{}) error {
+	query = fmt.Sprintf(query, tables...)
+	return db.DB.Select(dest, query, args...)
+}
+
+func (db *DB) ExecWrapper(tables []interface{}, query string, args ...interface{}) (sql.Result, error) {
+	query = fmt.Sprintf(query, tables...)
+	return db.DB.Exec(query, args...)
+}
+
+func (db *DB) QueryRowxWrapper(tables []interface{}, query string, args ...interface{}) *sqlx.Row {
+	query = fmt.Sprintf(query, tables...)
+	return db.DB.QueryRowx(query, args...)
+}
+
+func (db *DB) QueryxWrapper(tables []interface{}, query string, args ...interface{}) (*sqlx.Rows, error) {
+	query = fmt.Sprintf(query, tables...)
+	return db.DB.Queryx(query, args...)
+}
+
+func (db *DB) GetWrapper(tables []interface{}, dest interface{}, query string, args ...interface{}) error {
+	query = fmt.Sprintf(query, tables...)
+	return db.DB.Get(dest, query, args...)
+}
+
+func NewDB(sqlxdb *sqlx.DB) *DB {
+	db := &DB{
+		sqlxdb,
+	}
+	return db
+}
+
 type dbSql struct {
 	dbType   string
 	dbName   string
@@ -22,7 +69,7 @@ type dbSql struct {
 	timeOut  time.Duration
 	userName string
 	passWord string
-	db       *sqlx.DB
+	db       *DB
 }
 
 func (m *dbSql) getType() string {
@@ -67,7 +114,8 @@ func NewdbSql(dbtype, dbname string, cfg []byte) (*dbSql, error) {
 	return info, err
 }
 
-func dial(info *dbSql) (db *sqlx.DB, err error) {
+func dial(info *dbSql) (db *DB, err error) {
+	fun := "dial-->"
 
 	var dataSourceName string
 	if info.dbType == DB_TYPE_MYSQL {
@@ -78,14 +126,63 @@ func dial(info *dbSql) (db *sqlx.DB, err error) {
 			info.userName, info.passWord, info.dbAddrs, info.dbName)
 	}
 
-	return sqlx.Connect(info.dbType, dataSourceName)
+	slog.Infof("%s dbtype:%s datasourcename:%s", fun, info.dbType, dataSourceName)
+	sqlxdb, err := sqlx.Connect(info.dbType, dataSourceName)
+	return NewDB(sqlxdb), err
 }
 
-func (m *dbSql) getDB() *sqlx.DB {
+func (m *dbSql) getDB() *DB {
 	return m.db
 }
 
-func (m *Router) SqlExec(cluster, table string, query func(*sqlx.DB) error) error {
+func (m *Router) SqlExec(cluster string, query func(*DB, []interface{}) error, tables ...string) error {
+	st := stime.NewTimeStat()
+
+	if len(tables) <= 0 {
+		return fmt.Errorf("tables is empty")
+	}
+
+	table := tables[0]
+	ins_name := m.dbCls.getInstance(cluster, table)
+	if ins_name == "" {
+		return fmt.Errorf("cluster instance not find: cluster:%s table:%s", cluster, table)
+	}
+
+	durInsn := st.Duration()
+	st.Reset()
+
+	ins := m.dbIns.get(ins_name)
+	if ins == nil {
+		return fmt.Errorf("db instance not find: cluster:%s table:%s", cluster, table)
+	}
+
+	durIns := st.Duration()
+	st.Reset()
+
+	dbsql, ok := ins.(*dbSql)
+	if !ok {
+		return fmt.Errorf("db instance type error: cluster:%s table:%s type:%s", cluster, table, ins.getType())
+	}
+
+	durInst := st.Duration()
+	st.Reset()
+
+	db := dbsql.getDB()
+
+	defer func() {
+		dur := st.Duration()
+		slog.Infof("[SQL] cls:%s table:%s nmins:%d ins:%d rins:%d query:%d", cluster, table, durInsn, durIns, durInst, dur)
+	}()
+
+	var tmptables []interface{}
+	for _, item := range tables {
+		tmptables = append(tmptables, item)
+	}
+
+	return query(db, tmptables)
+}
+
+func (m *Router) SqlExecDeprecated(cluster, table string, query func(*sqlx.DB) error) error {
 	st := stime.NewTimeStat()
 
 	ins_name := m.dbCls.getInstance(cluster, table)
@@ -119,5 +216,5 @@ func (m *Router) SqlExec(cluster, table string, query func(*sqlx.DB) error) erro
 		slog.Infof("[SQL] cls:%s table:%s nmins:%d ins:%d rins:%d query:%d", cluster, table, durInsn, durIns, durInst, dur)
 	}()
 
-	return query(db)
+	return query(db.DB)
 }
