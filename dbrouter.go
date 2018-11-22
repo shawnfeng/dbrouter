@@ -43,6 +43,7 @@ type routeConfig struct {
 type Router struct {
 	dbCls *dbCluster
 	dbIns *dbInstanceManager
+	stat *statReport
 }
 
 func (m *Router) String() string {
@@ -58,6 +59,12 @@ func (m *Router) RouterInfo(cluster, table string) string {
 		return "{}"
 	}
 }
+
+func (m *Router) StatInfo() []*QueryStat {
+	return m.stat.statInfo()
+}
+
+
 
 // 检查用户输入的合法性
 // 1. 只能是字母或者下划线
@@ -105,6 +112,8 @@ func NewRouter(jscfg []byte) (*Router, error) {
 		dbIns: &dbInstanceManager{
 			instances: make(map[string]dbInstance),
 		},
+
+		stat: newStat(),
 	}
 
 	inss := cfg.Instances
