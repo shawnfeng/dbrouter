@@ -1,10 +1,5 @@
 module github.com/shawnfeng/dbrouter
 
-replace (
-	code.google.com/p/go-uuid => github.com/shawnfeng/googleuuid v1.0.0
-	code.google.com/p/goprotobuf => github.com/shawnfeng/googlpb v1.0.0
-)
-
 require (
 	github.com/bitly/go-simplejson v0.4.4-0.20140701141959-3378bdcb5ceb
 	// nn
@@ -14,7 +9,7 @@ require (
 	github.com/lib/pq v0.0.0-20170603225454-8837942c3e09
 	// nn
 	github.com/mattn/go-sqlite3 v1.10.0 // indirect
-	github.com/shawnfeng/sutil v1.0.0
+	github.com/shawnfeng/sutil v1.0.1
 	gopkg.in/mgo.v2 v2.0.0-20141107142503-e2e914857713
 
 )
