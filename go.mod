@@ -9,7 +9,8 @@ require (
 	github.com/lib/pq v0.0.0-20170603225454-8837942c3e09
 	// nn
 	github.com/mattn/go-sqlite3 v1.10.0 // indirect
-	github.com/shawnfeng/sutil v1.0.1
+	github.com/shawnfeng/sutil v1.0.3
 	gopkg.in/mgo.v2 v2.0.0-20141107142503-e2e914857713
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 
 )

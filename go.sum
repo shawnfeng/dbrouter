@@ -29,8 +29,10 @@ github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/sdming/gosnow v0.0.0-20130403030620-3a05c415e886/go.mod h1:xucuMeiX1TAS2KBgvWFPd0UZN3BnOmHZEggfq28hlfA=
-github.com/shawnfeng/sutil v1.0.1 h1:6/Yvu5hErHmOUKmTgwlVaZlMDBq+I5CA8nDL5g/AHB4=
-github.com/shawnfeng/sutil v1.0.1/go.mod h1:LbjZRtKxaceRvFCjyklfg8ZJoh0K64Zam2pKMwbuNBo=
+github.com/shawnfeng/lumberjack.v2 v0.0.0-20181211043042-d38ab0a61bdb h1:8XB3GJL0SMlYBeVm/CTdqHavrlX7lKsvTE1MuTLE4Vs=
+github.com/shawnfeng/lumberjack.v2 v0.0.0-20181211043042-d38ab0a61bdb/go.mod h1:9u5PFfVGpGVlGplh2jWs0UqjcY3ptVZ/v5iXpsRGg9M=
+github.com/shawnfeng/sutil v1.0.3 h1:P1v0B8tNpy8B1tINrmED50MYfBgrGiPLmyKRZAeqHUo=
+github.com/shawnfeng/sutil v1.0.3/go.mod h1:gC6fb29UYcWtVS0lzefv2H02cRw5AEUO8egG1mFuFo4=
 github.com/stretchr/testify v1.2.3-0.20181014000028-04af85275a5c h1:03OmljzZYsezlgAfa+f/cY8E8XXPiFh5bgANMhUlDI4=
 github.com/stretchr/testify v1.2.3-0.20181014000028-04af85275a5c/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchrcom/testify v1.2.2/go.mod h1:zUrQijuLcfRPyrWG6SBFjct9CuJZz2Ybtack4DGF2Jo=
