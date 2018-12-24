@@ -215,7 +215,7 @@ func (m *Router) SqlExecDeprecated(cluster, table string, query func(*sqlx.DB) e
 	defer func() {
 		m.stat.incQuery(cluster, table)
 		dur := st.Duration()
-		slog.Infof("[SQL] cls:%s table:%s nmins:%d ins:%d rins:%d query:%d", cluster, table, durInsn, durIns, durInst, dur)
+		slog.Tracef("[SQL] cls:%s table:%s nmins:%d ins:%d rins:%d query:%d", cluster, table, durInsn, durIns, durInst, dur)
 	}()
 
 	return query(db.DB)
