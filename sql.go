@@ -172,7 +172,7 @@ func (m *Router) SqlExec(cluster string, query func(*DB, []interface{}) error, t
 	defer func() {
 		dur := st.Duration()
 		m.stat.incQuery(cluster, table)
-		slog.Infof("[SQL] cls:%s table:%s nmins:%d ins:%d rins:%d query:%d", cluster, table, durInsn, durIns, durInst, dur)
+		slog.Tracef("[SQL] cls:%s table:%s nmins:%d ins:%d rins:%d query:%d", cluster, table, durInsn, durIns, durInst, dur)
 	}()
 
 	var tmptables []interface{}
