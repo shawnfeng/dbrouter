@@ -3,21 +3,20 @@ package dbrouter
 import (
 	"sync"
 	"sync/atomic"
-
+	"time"
 	//"github.com/shawnfeng/sutil/slog"
 )
 
 type QueryStat struct {
 	ClusterTable string
-	Count int64
+	Count        int64
+	Sum          int64
 }
-
 
 type statReport struct {
 	mu   sync.RWMutex
 	runs map[string]*QueryStat
 }
-
 
 func newStat() *statReport {
 	return &statReport{
@@ -36,6 +35,7 @@ func (m *statReport) getItem(key string) *QueryStat {
 func (m *statReport) copyItem(item *QueryStat) *QueryStat {
 	return &QueryStat{
 		Count: atomic.SwapInt64(&item.Count, 0),
+		Sum:   atomic.SwapInt64(&item.Sum, 0),
 	}
 
 }
@@ -60,8 +60,7 @@ func (m *statReport) addItem(key string) *QueryStat {
 	defer m.mu.Unlock()
 	// recheck again
 	if m.runs[key] == nil {
-		item := &QueryStat{
-		}
+		item := &QueryStat{}
 		m.copyItem(item)
 
 		m.runs[key] = item
@@ -70,16 +69,16 @@ func (m *statReport) addItem(key string) *QueryStat {
 	return m.runs[key]
 }
 
-
-
-func (m *statReport) incQuery(cluster, table string) {
-	key := cluster+"."+table
+func (m *statReport) incQuery(cluster, table string, elapse time.Duration) {
+	key := cluster + "." + table
 
 	item := m.getItem(key)
 	if item == nil {
 		item = m.addItem(key)
 	}
 
+	micro := elapse.Nanoseconds() / 1000
 
 	atomic.AddInt64(&item.Count, 1)
+	atomic.AddInt64(&item.Sum, micro)
 }

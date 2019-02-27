@@ -161,6 +161,7 @@ func (m *dbMongo) getSession(consistency mode) (*mgo.Session, error) {
 }
 
 func (m *Router) mongoExec(consistency mode, cluster, table string, query func(*mgo.Collection) error) error {
+	stall := stime.NewTimeStat()
 	st := stime.NewTimeStat()
 
 	ins_name := m.dbCls.getInstance(cluster, table)
@@ -208,7 +209,7 @@ func (m *Router) mongoExec(consistency mode, cluster, table string, query func(*
 
 	defer func() {
 		dur := st.Duration()
-		m.stat.incQuery(cluster, table)
+		m.stat.incQuery(cluster, table, stall.Duration())
 		slog.Tracef("[MONGO] const:%d cls:%s table:%s nmins:%d ins:%d rins:%d sess:%d copy:%d query:%d", consistency, cluster, table, durInsn, durIns, durInst, durSess, durcopy, dur)
 	}()
 
