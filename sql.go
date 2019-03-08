@@ -77,6 +77,7 @@ func (m *dbSql) getType() string {
 }
 
 func NewdbSql(dbtype, dbname string, cfg []byte) (*dbSql, error) {
+	fun := "NewdbSql-->"
 
 	cfg_json, err := simplejson.NewJson(cfg)
 	if err != nil {
@@ -110,6 +111,9 @@ func NewdbSql(dbtype, dbname string, cfg []byte) (*dbSql, error) {
 	}
 
 	info.db, err = dial(info)
+	if err != nil {
+		slog.Errorf("%s dbtype:%s dbname:%s cfg:%s", fun, info.dbType, info.dbName, string(cfg))
+	}
 	info.db.SetMaxIdleConns(8)
 	return info, err
 }
@@ -136,15 +140,17 @@ func (m *dbSql) getDB() *DB {
 }
 
 func (m *Router) SqlExec(cluster string, query func(*DB, []interface{}) error, tables ...string) error {
+	fun := "Router.SqlExec -->"
+
 	stall := stime.NewTimeStat()
 	st := stime.NewTimeStat()
-
 	if len(tables) <= 0 {
 		return fmt.Errorf("tables is empty")
 	}
 
 	table := tables[0]
 	ins_name := m.dbCls.getInstance(cluster, table)
+	slog.Infof("%s cls:%s db:%s table:%s", fun, cluster, ins_name, table)
 	if ins_name == "" {
 		return fmt.Errorf("cluster instance not find: cluster:%s table:%s", cluster, table)
 	}
