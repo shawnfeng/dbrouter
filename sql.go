@@ -148,6 +148,7 @@ func (m *Router) SqlExec(cluster string, query func(*DB, []interface{}) error, t
 		return fmt.Errorf("tables is empty")
 	}
 
+	fun := "Router.SqlExec -->"
 	table := tables[0]
 	ins_name := m.dbCls.getInstance(cluster, table)
 	slog.Infof("%s cls:%s db:%s table:%s", fun, cluster, ins_name, table)
