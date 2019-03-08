@@ -142,11 +142,12 @@ func (m *dbSql) getDB() *DB {
 func (m *Router) SqlExec(cluster string, query func(*DB, []interface{}) error, tables ...string) error {
 	fun := "Router.SqlExec -->"
 
+	stall := stime.NewTimeStat()
 	st := stime.NewTimeStat()
 	if len(tables) <= 0 {
 		return fmt.Errorf("tables is empty")
 	}
-  
+
 	table := tables[0]
 	ins_name := m.dbCls.getInstance(cluster, table)
 	slog.Infof("%s cls:%s db:%s table:%s", fun, cluster, ins_name, table)
