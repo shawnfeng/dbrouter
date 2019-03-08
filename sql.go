@@ -143,12 +143,10 @@ func (m *Router) SqlExec(cluster string, query func(*DB, []interface{}) error, t
 	fun := "Router.SqlExec -->"
 
 	st := stime.NewTimeStat()
-
 	if len(tables) <= 0 {
 		return fmt.Errorf("tables is empty")
 	}
-
-	fun := "Router.SqlExec -->"
+  
 	table := tables[0]
 	ins_name := m.dbCls.getInstance(cluster, table)
 	slog.Infof("%s cls:%s db:%s table:%s", fun, cluster, ins_name, table)
@@ -179,7 +177,7 @@ func (m *Router) SqlExec(cluster string, query func(*DB, []interface{}) error, t
 
 	defer func() {
 		dur := st.Duration()
-		m.stat.incQuery(cluster, table)
+		m.stat.incQuery(cluster, table, stall.Duration())
 		slog.Tracef("[SQL] cls:%s table:%s nmins:%d ins:%d rins:%d query:%d", cluster, table, durInsn, durIns, durInst, dur)
 	}()
 
@@ -192,6 +190,7 @@ func (m *Router) SqlExec(cluster string, query func(*DB, []interface{}) error, t
 }
 
 func (m *Router) SqlExecDeprecated(cluster, table string, query func(*sqlx.DB) error) error {
+	stall := stime.NewTimeStat()
 	st := stime.NewTimeStat()
 
 	ins_name := m.dbCls.getInstance(cluster, table)
@@ -221,7 +220,7 @@ func (m *Router) SqlExecDeprecated(cluster, table string, query func(*sqlx.DB) e
 	db := dbsql.getDB()
 
 	defer func() {
-		m.stat.incQuery(cluster, table)
+		m.stat.incQuery(cluster, table, stall.Duration())
 		dur := st.Duration()
 		slog.Tracef("[SQL] cls:%s table:%s nmins:%d ins:%d rins:%d query:%d", cluster, table, durInsn, durIns, durInst, dur)
 	}()
