@@ -140,8 +140,6 @@ func (m *dbSql) getDB() *DB {
 }
 
 func (m *Router) SqlExec(cluster string, query func(*DB, []interface{}) error, tables ...string) error {
-	fun := "Router.SqlExec -->"
-
 	stall := stime.NewTimeStat()
 	st := stime.NewTimeStat()
 	if len(tables) <= 0 {
@@ -150,7 +148,6 @@ func (m *Router) SqlExec(cluster string, query func(*DB, []interface{}) error, t
 
 	table := tables[0]
 	ins_name := m.dbCls.getInstance(cluster, table)
-	slog.Infof("%s cls:%s db:%s table:%s", fun, cluster, ins_name, table)
 	if ins_name == "" {
 		return fmt.Errorf("cluster instance not find: cluster:%s table:%s", cluster, table)
 	}
