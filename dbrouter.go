@@ -43,7 +43,7 @@ type routeConfig struct {
 type Router struct {
 	dbCls *dbCluster
 	dbIns *dbInstanceManager
-	stat *statReport
+	stat  *statReport
 }
 
 func (m *Router) String() string {
@@ -63,8 +63,6 @@ func (m *Router) RouterInfo(cluster, table string) string {
 func (m *Router) StatInfo() []*QueryStat {
 	return m.stat.statInfo()
 }
-
-
 
 // 检查用户输入的合法性
 // 1. 只能是字母或者下划线
@@ -142,14 +140,16 @@ func NewRouter(jscfg []byte) (*Router, error) {
 		if tp == DB_TYPE_MONGO {
 			dbi, err := NewdbMongo(tp, dbname, cfg)
 			if err != nil {
-				return nil, fmt.Errorf("init mongo config err:%s", err.Error())
+				slog.Errorf("%s init mongo config: %s err: %s", fun, cfg, err.Error())
+				continue
 			}
 
 			r.dbIns.add(ins, dbi)
 		} else if tp == DB_TYPE_MYSQL || tp == DB_TYPE_POSTGRES {
 			dbi, err := NewdbSql(tp, dbname, cfg)
 			if err != nil {
-				return nil, fmt.Errorf("init %s cfg:%s, config err:%s", tp, string(cfg), err.Error())
+				slog.Errorf("%s init mysql config: %s err: %s", fun, cfg, err.Error())
+				continue
 			}
 
 			r.dbIns.add(ins, dbi)
