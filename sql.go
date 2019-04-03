@@ -113,6 +113,7 @@ func NewdbSql(dbtype, dbname string, cfg []byte) (*dbSql, error) {
 	info.db, err = dial(info)
 	if err != nil {
 		slog.Errorf("%s dbtype:%s dbname:%s cfg:%s", fun, info.dbType, info.dbName, string(cfg))
+		return nil, err
 	}
 	info.db.SetMaxIdleConns(8)
 	return info, err
