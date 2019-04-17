@@ -96,12 +96,6 @@ func checkVarname(varname string) error {
 func NewRouter(jscfg []byte) (*Router, error) {
 	fun := "NewRouter -->"
 
-	var cfg routeConfig
-	err := json.Unmarshal(jscfg, &cfg)
-	if err != nil {
-		return nil, fmt.Errorf("dbrouter config unmarshal:%s", err)
-	}
-
 	r := &Router{
 		dbCls: &dbCluster{
 			clusters: make(map[string]*clsEntry),
@@ -114,10 +108,20 @@ func NewRouter(jscfg []byte) (*Router, error) {
 		stat: newStat(),
 	}
 
+	var cfg routeConfig
+	err := json.Unmarshal(jscfg, &cfg)
+	if err != nil {
+		//return nil, fmt.Errorf("dbrouter config unmarshal:%s", err)
+		slog.Errorf("%s dbrouter config unmarshal:%s", fun, err.Error())
+		return r, nil
+	}
+
 	inss := cfg.Instances
 	for ins, db := range inss {
 		if er := checkVarname(ins); er != nil {
-			return nil, fmt.Errorf("instances name config err:%s", er)
+			//return nil, fmt.Errorf("instances name config err:%s", er)
+			slog.Errorf("%s instances name config err:%s", fun, err.Error())
+			continue
 		}
 
 		tp := db.Dbtype
@@ -125,15 +129,21 @@ func NewRouter(jscfg []byte) (*Router, error) {
 		cfg := db.Dbcfg
 
 		if er := checkVarname(tp); er != nil {
-			return nil, fmt.Errorf("dbtype instance:%s err:%s", ins, er)
+			//return nil, fmt.Errorf("dbtype instance:%s err:%s", ins, er)
+			slog.Errorf("%s dbtype instance:%s err:%s", fun, ins, er.Error())
+			continue
 		}
 
 		if er := checkVarname(dbname); er != nil {
-			return nil, fmt.Errorf("dbname instance:%s err:%s", ins, er)
+			//return nil, fmt.Errorf("dbname instance:%s err:%s", ins, er)
+			slog.Errorf("%sdbname instance:%s err:%s", fun, ins, er.Error())
+			continue
 		}
 
 		if len(cfg) == 0 {
-			return nil, fmt.Errorf("empty dbcfg instance:%s", ins)
+			//return nil, fmt.Errorf("empty dbcfg instance:%s", ins)
+			slog.Errorf("%s empty dbcfg instance:%s", fun, ins)
+			continue
 		}
 
 		// 工厂化构造，db类型领出来
@@ -163,24 +173,34 @@ func NewRouter(jscfg []byte) (*Router, error) {
 	cls := cfg.Cluster
 	for c, ins := range cls {
 		if er := checkVarname(c); er != nil {
-			return nil, fmt.Errorf("cluster config name err:%s", er)
+			slog.Errorf("%s cluster config name err:%s", fun, err)
+			continue
+			//return nil, fmt.Errorf("cluster config name err:%s", er)
 		}
 
 		if len(ins) == 0 {
-			return nil, fmt.Errorf("empty instance in cluster:%s", c)
+			slog.Errorf("%s empty instance in cluster:%s", fun, c)
+			continue
+			//return nil, fmt.Errorf("empty instance in cluster:%s", c)
 		}
 
 		for _, v := range ins {
 			if len(v.Express) == 0 {
-				return nil, fmt.Errorf("empty express in cluster:%s instance:%s", c, v.Instance)
+				slog.Errorf("%s empty express in cluster:%s instance:%s", fun, c, v.Instance)
+				continue
+				//return nil, fmt.Errorf("empty express in cluster:%s instance:%s", c, v.Instance)
 			}
 
 			if er := checkVarname(v.Match); er != nil {
-				return nil, fmt.Errorf("match in cluster:%s instance:%s err:%s", c, v.Instance, er)
+				slog.Errorf("%s match in cluster:%s instance:%s err:%s", fun, c, v.Instance, err)
+				continue
+				//return nil, fmt.Errorf("match in cluster:%s instance:%s err:%s", c, v.Instance, er)
 			}
 
 			if er := checkVarname(v.Instance); er != nil {
-				return nil, fmt.Errorf("instance name in cluster:%s instance:%s err:%s", c, v.Instance, er)
+				//return nil, fmt.Errorf("instance name in cluster:%s instance:%s err:%s", c, v.Instance, er)
+				slog.Errorf("%s instance name in cluster:%s instance:%s err:%s", fun, c, v.Instance, err)
+				continue
 			}
 
 			if r.dbIns.get(v.Instance) == nil {
