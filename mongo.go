@@ -43,7 +43,7 @@ func NewdbMongo(dbtype, dbname string, cfg []byte) (*dbMongo, error) {
 		return nil, fmt.Errorf("instance db:%s type:%s config:% addrs err:%s", dbname, dbtype, cfg, err)
 	}
 
-	timeout := 60 * time.Second
+	timeout := 5 * time.Second
 	if t, err := cfg_json.Get("timeout").Int64(); err == nil {
 		timeout = time.Duration(t) * time.Millisecond
 	}
@@ -57,7 +57,7 @@ func NewdbMongo(dbtype, dbname string, cfg []byte) (*dbMongo, error) {
 		Database:  dbname,
 		Username:  user,
 		Password:  passwd,
-		PoolLimit: 64,
+		PoolLimit: 256,
 	}
 
 	return &dbMongo{
