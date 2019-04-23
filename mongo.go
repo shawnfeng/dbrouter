@@ -52,11 +52,12 @@ func NewdbMongo(dbtype, dbname string, cfg []byte) (*dbMongo, error) {
 	passwd, _ := cfg_json.Get("passwd").String()
 
 	info := &mgo.DialInfo{
-		Addrs:    addrs,
-		Timeout:  timeout,
-		Database: dbname,
-		Username: user,
-		Password: passwd,
+		Addrs:     addrs,
+		Timeout:   timeout,
+		Database:  dbname,
+		Username:  user,
+		Password:  passwd,
+		PoolLimit: 64,
 	}
 
 	return &dbMongo{
