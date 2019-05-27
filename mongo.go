@@ -57,7 +57,7 @@ func NewdbMongo(dbtype, dbname string, cfg []byte) (*dbMongo, error) {
 		Database:  dbname,
 		Username:  user,
 		Password:  passwd,
-		PoolLimit: 1024,
+		PoolLimit: 512,
 	}
 
 	return &dbMongo{
