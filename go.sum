@@ -55,6 +55,8 @@ github.com/shawnfeng/sutil v1.0.3/go.mod h1:gC6fb29UYcWtVS0lzefv2H02cRw5AEUO8egG
 github.com/shawnfeng/sutil v1.0.5 h1:K1XZWKslphtJRD80JI5KnL0Cjx4UXiZDy7sNyt9zZQ0=
 github.com/shawnfeng/sutil v1.0.6-0.20190612064217-4485260d6f3e h1:2/jXnbwWYHMkXLzX/1JtvlzzoIqLaTrAzVWNqssx6Hc=
 github.com/shawnfeng/sutil v1.0.6-0.20190612064217-4485260d6f3e/go.mod h1:KAqzEe6emfFtMHigvxexqsa5gHr0PPtldQeH/6EH6cU=
+github.com/shawnfeng/sutil v1.0.6-0.20190612070047-afb054cc79dd h1:IjtsVHMkjH8i2mwv2FAhwvuvA6WYZG8GPNE5Xlk/lMU=
+github.com/shawnfeng/sutil v1.0.6-0.20190612070047-afb054cc79dd/go.mod h1:ovfhcFfs/F5Tl98ctA4YvCWgYXWnDondfGeBk1spt2I=
 github.com/stretchr/testify v1.2.3-0.20181014000028-04af85275a5c h1:03OmljzZYsezlgAfa+f/cY8E8XXPiFh5bgANMhUlDI4=
 github.com/stretchr/testify v1.2.3-0.20181014000028-04af85275a5c/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchrcom/testify v1.2.2/go.mod h1:zUrQijuLcfRPyrWG6SBFjct9CuJZz2Ybtack4DGF2Jo=
