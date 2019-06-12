@@ -116,6 +116,7 @@ func NewdbSql(dbtype, dbname string, cfg []byte) (*dbSql, error) {
 		return nil, err
 	}
 	info.db.SetMaxIdleConns(8)
+	info.db.SetMaxOpenConns(128)
 	return info, err
 }
 
@@ -176,7 +177,7 @@ func (m *Router) SqlExec(cluster string, query func(*DB, []interface{}) error, t
 
 	defer func() {
 		dur := st.Duration()
-		m.stat.incQuery(cluster, table, stall.Duration())
+		m.stat.IncQuery(cluster, table, stall.Duration())
 		slog.Tracef("[SQL] cls:%s table:%s nmins:%d ins:%d rins:%d query:%d", cluster, table, durInsn, durIns, durInst, dur)
 	}()
 
@@ -219,7 +220,7 @@ func (m *Router) SqlExecDeprecated(cluster, table string, query func(*sqlx.DB) e
 	db := dbsql.getDB()
 
 	defer func() {
-		m.stat.incQuery(cluster, table, stall.Duration())
+		m.stat.IncQuery(cluster, table, stall.Duration())
 		dur := st.Duration()
 		slog.Tracef("[SQL] cls:%s table:%s nmins:%d ins:%d rins:%d query:%d", cluster, table, durInsn, durIns, durInst, dur)
 	}()
