@@ -210,7 +210,7 @@ func (m *Router) mongoExec(consistency mode, cluster, table string, query func(*
 
 	defer func() {
 		dur := st.Duration()
-		m.stat.incQuery(cluster, table, stall.Duration())
+		m.stat.IncQuery(cluster, table, stall.Duration())
 		slog.Tracef("[MONGO] const:%d cls:%s table:%s nmins:%d ins:%d rins:%d sess:%d copy:%d query:%d", consistency, cluster, table, durInsn, durIns, durInst, durSess, durcopy, dur)
 	}()
 

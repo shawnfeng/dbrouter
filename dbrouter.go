@@ -7,6 +7,7 @@ package dbrouter
 import (
 	"fmt"
 	"github.com/shawnfeng/sutil/slog"
+	"github.com/shawnfeng/sutil/stat"
 	//"sync"
 	"encoding/json"
 )
@@ -43,7 +44,7 @@ type routeConfig struct {
 type Router struct {
 	dbCls *dbCluster
 	dbIns *dbInstanceManager
-	stat  *statReport
+	stat  *stat.StatReport
 }
 
 func (m *Router) String() string {
@@ -60,8 +61,8 @@ func (m *Router) RouterInfo(cluster, table string) string {
 	}
 }
 
-func (m *Router) StatInfo() []*QueryStat {
-	return m.stat.statInfo()
+func (m *Router) StatInfo() []*stat.QueryStat {
+	return m.stat.StatInfo()
 }
 
 // 检查用户输入的合法性
@@ -105,7 +106,7 @@ func NewRouter(jscfg []byte) (*Router, error) {
 			instances: make(map[string]dbInstance),
 		},
 
-		stat: newStat(),
+		stat: stat.NewStat(),
 	}
 
 	var cfg routeConfig
